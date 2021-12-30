@@ -1,11 +1,11 @@
 // We want to render an existing html page instead of showing a static message.
 const express = require('express');
 
-const app = express();
-const port = 3000;
-
 // Include path module in our application. To learn more : https://www.w3schools.com/nodejs/ref_path.asp
 const path = require('path');
+
+const app = express();
+const port = 3000;
 
 /* Note that this is a middleware. Everytime you see app.use just know that
 this is how middlewares are applied in express. This instructs express to look into

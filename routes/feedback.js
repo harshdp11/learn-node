@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
 
-module.exports = () => {
-  router.get('/', (request, response) => {
+module.exports = (params) => {
+  const { feedbackService } = params;
+  router.get('/', async (request, response) => {
     /* Since we don't have a webpage for speakers.js developed yet, we simply return a message for now */
-    return response.send('heres your feedback page');
+    // return response.send('heres your feedback page');
+    // Refer to speakers.js for info on what changes have been made
+
+    const feedback = await feedbackService.getList();
+    return response.json(feedback);
   });
 
   /* Here we handle the route after user submits the feedback form */

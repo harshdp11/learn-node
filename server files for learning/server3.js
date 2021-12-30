@@ -1,10 +1,9 @@
 // We want to render a template file(index.ejs) and pass a variable(page title) from server to the template file.
 const express = require('express');
+const path = require('path');
 
 const app = express();
 const port = 3000;
-
-const path = require('path');
 
 // Letting the server know that we're using ejs for templating engine
 app.set('view engine', 'ejs');
