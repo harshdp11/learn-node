@@ -218,6 +218,8 @@ Go to inspect > Network > Cookies
 
 # REST APIs for reading and writing feedbacks
 
+We want to read and write feedbacks using rest api. To this we go to the feedback.js file and create a middleware for a new route '/api'(localhost:3000/feedback/api)
+
 # Server files explained
 
 - server.js : contains the code that is rendered to localhost:300

@@ -59,6 +59,8 @@ app.use(
 
 // Run the body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+// Run the body parser for rest api
+app.use(bodyParser.json());
 
 app.use(
   '/',

@@ -48,40 +48,68 @@ module.exports = (params) => {
       check('title').trim().isLength({ min: 3 }).escape().withMessage('A title is required'),
       check('message').trim().isLength({ min: 5 }).escape().withMessage('A message is required'),
     ],
-    async (request, response) => {
-      /* Here we handle what happens when the user submits the form */
+    async (request, response, next) => {
+      try {
+        /* Here we handle what happens when the user submits the form */
 
-      // here we can check if there were any errors
-      const errors = validationResult(request); // get all the errors from express-validator
+        // here we can check if there were any errors
+        const errors = validationResult(request); // get all the errors from express-validator
 
-      // now we handle the case where there were errors. checking if there are any errors
-      if (!errors.isEmpty()) {
-        // if there are errors store them in an object
+        // now we handle the case where there were errors. checking if there are any errors
+        if (!errors.isEmpty()) {
+          // if there are errors store them in an object
+          request.session.feedbacks = {
+            // storing array of errors from validationResult
+            errors: errors.array(),
+          };
+          return response.redirect('/feedback');
+        }
+
+        // Now we want to write the user inputs into feedback.json through feedbackService file
+        const { name, email, title, message } = request.body; // get the user inputs into variables
+        await feedbackService.addEntry(name, email, title, message); // write user inputs into files
+
+        // Show a success message on form submission
         request.session.feedbacks = {
-          // storing array of errors from validationResult
-          errors: errors.array(),
+          successMessage: 'Thanks for your feedback',
         };
+
+        /* we want to display the feedback page again. because we want to avoid users to reload the page and send the same input  */
+
+        /*NOTE : In case of an error we store the error in an array and redirect to feedback route. Also if there were errors we need to show that on the page. So we pass the errors to the router.get middleware*/
+
+        // the input from the form can be accessed using the body parser middleware in request.body object
+        //console.log(request.body);
         return response.redirect('/feedback');
+      } catch (err) {
+        return next(err);
       }
-
-      // Now we want to write the user inputs into feedback.json through feedbackService file
-      const { name, email, title, message } = request.body; // get the user inputs into variables
-      await feedbackService.addEntry(name, email, title, message); // write user inputs into files
-
-      // Show a success message on form submission
-      request.session.feedbacks = {
-        successMessage: 'Thanks for your feedback',
-      };
-
-      /* we want to display the feedback page again. because we want to avoid users to reload the page and send the same input  */
-
-      /*NOTE : In case of an error we store the error in an array and redirect to feedback route. Also if there were errors we need to show that on the page. So we pass the errors to the router.get middleware*/
-
-      // the input from the form can be accessed using the body parser middleware in request.body object
-      //console.log(request.body);
-      return response.redirect('/feedback');
     }
   );
 
+  router.post(
+    '/api',
+    [
+      // entered input goes through all the checks and
+      check('name').trim().isLength({ min: 3 }).escape().withMessage('A name is required'),
+      check('email').trim().isEmail().normalizeEmail().withMessage('A valid email is required'),
+      check('title').trim().isLength({ min: 3 }).escape().withMessage('A title is required'),
+      check('message').trim().isLength({ min: 5 }).escape().withMessage('A message is required'),
+    ],
+    async (request, response, next) => {
+      try {
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+          return response.json({ errors: errors.array() });
+        }
+        const { name, email, title, message } = request.body; // get the user inputs into variables
+        await feedbackService.addEntry(name, email, title, message);
+        const feedbacks = await feedbackService.getList();
+        return response.json({ feedbacks });
+      } catch (err) {
+        return next(err);
+      }
+    }
+  );
   return router;
 };
