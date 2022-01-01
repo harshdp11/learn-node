@@ -26,9 +26,13 @@ module.exports = (params) => {
     console.log(`Visit count : ${request.session.visitCount}`);
     */
 
-    const topSpeakers = await speakerService.getList();
-    response.render('layout', { pageTitle: 'Welcome', template: 'index', topSpeakers });
-    // Note we didn't write layout/index because just writing layout defaults to layout/index
+    try {
+      const topSpeakers = await speakerService.getList();
+      response.render('layout', { pageTitle: 'Welcome', template: 'index', topSpeakers });
+      // Note we didn't write layout/index because just writing layout defaults to layout/index
+    } catch (err) {
+      return next(err);
+    }
   });
 
   router.use('/feedback', feedbackRouter(params));

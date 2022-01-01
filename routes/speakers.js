@@ -21,10 +21,13 @@ module.exports = (params) => {
     //return response.send(`Details page of ${request.params.shortname}`);
 
     /* Note :  the getSpeaker function returns the info about a speaker. This method requests the shortname of the speaker as an argument. Refer to speakerService file for reference */
-    const speaker = await speakerService.getSpeaker(request.params.shortname);
-    const artworks = await speakerService.getArtworkForSpeaker(request.params.shortname);
-    console.log(artworks);
-    response.render('layout', { pageTitle: 'Speaker', template: 'speaker-details', speaker, artworks });
+    try {
+      const speaker = await speakerService.getSpeaker(request.params.shortname);
+      const artworks = await speakerService.getArtworkForSpeaker(request.params.shortname);
+      response.render('layout', { pageTitle: 'Speaker', template: 'speaker-details', speaker, artworks });
+    } catch (err) {
+      return next(err);
+    }
   });
 
   return router;

@@ -152,6 +152,72 @@ Go to inspect > Network > Cookies
   Go to this link for example : https://codepen.io/harshdeepme/pen/yLzvqbY.
   Try catch only handle runtime error and not parse time error(syntax error )
 
+  NOTE : Throw in an asynchronous invocation will crash your app. e.g
+  app.get('/throw', (request, response, next) => {
+  setTimeout(()=>{
+  throw new Error ("Something went wrong");
+  }, 500);
+  });
+  This will crash your app.
+
+  In order to avoid this use next(). For example :
+  app.get('/throw', (request, response, next) => {
+  setTimeout(()=>{
+  return next(throw new Error ("Something went wrong"));
+  }, 500);
+  });
+  This will not crash your app.
+
+  So, never use throw in a middleware or asynchronous function .Always hav it in a next().
+
+  So to learn error handling, in our server file and all routes file, we will include try and catch and have our code inside it. Refer to these files for syntax.
+
+# Creating error pages
+
+- Create a new template file in views folder. This is our template for error.
+- We want create an error handler that shows this error page when no route matches our request.
+- We will create a middleware that captures this error. We will place this middleware at the very end after all routes. Which means if none of the routes match, this middleware would execute.
+- Go to server.js for code.
+- We install an express module called http errors that will help us do this. Command : sudo npm install http-errors. And then require it in our server.js file.
+- We create a middleware which had the http-errors module which creates an error
+- Then another middleware which renders the error page. We get the information about the error from the previous middleware and store them in response.locals so that only templates which this middleware points to has access to this info. We later pass this info to maker error status and error message dynamic. Refer to the error.ejs file.
+
+# Getting user inputs from feedback page
+
+- Setup the feedack.ejs page and show the existing feedback using variable and loop.
+- Enable the submit button by adding method="POST" and action="/feedback" in form div in feedback.ejs
+- Then name every input e.g name="name", name="email", name="title", name="message" in <input> div
+- Then we go to router.post middleware in feedback.js in routes. We want to get this data in the post middleware somehow. To do this we need another node mocule called body parser. We install this by sudo npm install body-parser. We install this and require it in server.js.
+- We include this middleware below cookie-session. You can look up the configuration of body parser on google.
+- Next, we want to validate the inputs made by the user. For this we need another node module called express-validator. To install : sudo npm install express-validator. Then we include this in the feedback.js file because we get the inputes there. We require this module in two objects. We do this using destructuring assignment (Know more here : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
+- Then we go to the post middleware and add a second argument in form of an array :
+  -> Check specifies which input to check
+  -> Trim removes empty characters in the begining and end
+  -> isLength checks on the length of the input (min and max)
+  -> escape makes sure that there is no html or javascript embedded in the entry
+  -> withMessage : this is the message that should be returned if something is wrong
+  -> isEmail checks if the entry is valid email
+  -> normalizeEmail adds formating to email, makes it lowercase
+- In the post middleware(in feedback.js) we get the error from express validator and store it in session. On submiting the page should redirect to the same page and the error should be shown. So we pass this error to the 'get' middleware and reset the session. From here we pass this error to the template where it gets displayed.
+- In the ejs file, if passed variable is false(i,e no error ) then that html doesnt print.
+
+# Storing user inputs
+
+- We can access the user inputs in the post middleware in feedback.js through request.body
+- We also want to display a success message on form submission. We do the same thing which we did for errors.
+
+# REST API
+
+- Representational State Transfer : a pattern for writing APIs.
+- HTTP Verbs in REST services :
+  -> get : to request a webpage
+  -> post : mostly used in forms.
+  -> put : Update a resource. defined in http standards but not used by browsers
+  -> delete : Delete a resource. defined in http standards but not used by browsers
+- A REST request usually returns a json file which is used to render the webpage. An https request returns a webpage. Hence we can use rest to dynamically update page without reloading.
+
+# REST APIs for reading and writing feedbacks
+
 # Server files explained
 
 - server.js : contains the code that is rendered to localhost:300

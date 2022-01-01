@@ -1,6 +1,10 @@
-// We want to learn more about template variables
+// We want to create error pages when a route is not found
 const express = require('express');
 const path = require('path');
+// include body parser module
+const bodyParser = require('body-parser');
+
+const createError = require('http-errors');
 
 const cookieSession = require('cookie-session');
 
@@ -14,6 +18,7 @@ const app = express();
 const port = 3000;
 
 const routes = require('./routes');
+const { request, response } = require('express');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, './views'));
@@ -52,6 +57,9 @@ app.use(
   })
 );
 
+// Run the body parser middleware
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(
   '/',
   routes({
@@ -59,6 +67,22 @@ app.use(
     speakerService: speakerService,
   })
 );
+
+// Using the http-errors module to create an error
+app.use((request, response, next) => {
+  return next(createError(404, 'File not found'));
+});
+// This is an error handling middleware. A middleware that takes 4 arguments is an error handling middleware
+app.use((err, request, response, next) => {
+  /* The response.locals property is an object that contains response local variables scoped to the request and because of this, it is only available to the view(s) rendered during that request/response cycle (if any) */
+  console.error(err); // give entire info about the error in console.
+  response.locals.message = err.message;
+  const status = err.status || 500; // 500 is the default internal server error status acc. to http standard
+  response.locals.status = status;
+  response.status(status);
+  // rendering the error.ejs file
+  response.render('error');
+});
 
 app.listen(port, () => {
   // eslint-disable-next-line no-console
